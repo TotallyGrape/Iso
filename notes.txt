@@ -1,0 +1,2 @@
+Strategy game with different commanders and troops.
+Drop into a map and clear the enemies.

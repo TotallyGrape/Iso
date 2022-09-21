@@ -1,48 +1,67 @@
 --iso
+require('entities')
 map={
     {
-        {0,0,0,0,0},
-        {0,0,0,0,0},
-        {0,0,0,4,0},
-        {0,0,0,0,0},
-        {0,0,0,0,0}
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,4,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0}
     },
     {
-        {0,0,0,0,0},
-        {0,0,0,4,0},
-        {0,0,4,3,4},
-        {0,0,0,4,0},
-        {0,0,0,0,0}
+        {0,0,0,0,0,0,0},
+        {0,0,0,4,0,0,0},
+        {0,0,4,3,4,0,0},
+        {0,0,0,4,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0}
     },
     {
-        {2,2,0,0,0},
-        {2,0,0,0,0},
-        {0,0,0,3,0},
-        {0,0,0,0,0},
-        {0,0,0,0,0}
+        {2,2,0,0,0,0,0},
+        {2,0,0,0,0,0,0},
+        {0,0,0,3,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0}
     },
     {
-        {1,1,2,2,2},
-        {1,2,2,2,2},
-        {2,2,2,2,2},
-        {2,2,2,2,2},
-        {2,2,2,2,2}
+        {1,1,2,2,2,0,0},
+        {1,2,2,2,2,0,0},
+        {2,2,2,2,2,0,0},
+        {2,2,2,2,2,0,0},
+        {2,2,2,2,2,0,0},
+        {0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0}
     },
     {
-        {1,1,1,1,1},
-        {1,1,1,1,1},
-        {1,1,1,1,1},
-        {1,1,1,1,1},
-        {1,1,1,1,1}
+        {1,1,1,1,1,2,2},
+        {1,1,1,1,1,2,2},
+        {1,1,1,1,1,2,2},
+        {1,1,1,1,1,2,2},
+        {1,1,1,1,1,2,2},
+        {2,2,2,2,2,2,2},
+        {2,2,2,2,2,2,2}
     },
 }
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    mx, my = love.mouse.getPosition()
+    troop_quads={}
+    monkey_images={love.graphics.newImage('images/monkey/up-left.png'),love.graphics.newImage('images/monkey/up-right.png'),love.graphics.newImage('images/monkey/down-left.png'),love.graphics.newImage('images/monkey/down-right.png')}
+    for x=0,3 do
+        table.insert(troop_quads,love.graphics.newQuad(x*16,0,16,16,monkey_images[1]))
+    end 
+    
     tiles=love.graphics.newImage("images/tiles.png")
 	selected={x=1,y=1}
 	sine=0
     tile_quads=load_quads()
+    new_troop()
 end
 
 function love.update(dt)
@@ -62,9 +81,10 @@ end
 
 function draw_grid()
     for n=5,1,-1 do
-        for x=1,5 do
-            for y=1,5 do
+        for x=1,7 do
+            for y=1,7 do
                 local _x,_y = vec(x,y)
+                draw_people(x,y,n,80+_x-8,-10+_y+n*9)
                 if map[n][y][x]~=0 then
 
                     local q = tile_quads[1][1]
@@ -77,7 +97,11 @@ function draw_grid()
                     elseif map[n][y][x]==4 then
                         q = tile_quads[5][2]
                     end
-                    love.graphics.draw(tiles,q,math.floor(80+_x-8),math.floor(_y+n*9+math.sin(sine+x/10)*2),0,1,1)
+                    --q=tile_quads[9][9]
+                    local col =(x+y)/10
+                    --love.graphics.setColor(col,col,col,1)
+                    love.graphics.draw(tiles,q,80+_x-8,-10+_y+n*9,0,1,1)
+                    
                 end
             end
         end
@@ -87,8 +111,8 @@ end
 function vec(x,y)
     local width = 16
     local height = 18
-	local _x= x*(1*width/2)+y*(-1*width/2)
-	local _y= x*(0.5*height/2)+y*(0.5*height/2)
+	local _x = x*(1*width/2)+y*(-1*width/2)
+	local _y = x*(0.5*height/2)+y*(0.5*height/2)
 	return _x,_y
 end
 
@@ -107,18 +131,19 @@ end
 function rotate_map()
     
     for n=5,1,-1 do
-        local m = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}}
-        for y=1,5 do
-            for x=1,5 do
-                m[-(x-3)+3][y]=map[n][y][x]
+        local m = {{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0},{0,0,0,0,0,0,0}}
+        for y=1,7 do
+            for x=1,7 do
+                    m[-(x-4)+4][y]=map[n][y][x]
             end
         end
         map[n] = m
     end
-
-    
 end
 
-function love.keypressed()
+function love.keypressed( key, scancode, isrepeat )
     rotate_map()
+    for i=#troop,1,-1 do
+        troop[i]:rotate_left()
+    end
 end
