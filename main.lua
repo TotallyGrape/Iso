@@ -11,7 +11,7 @@ map={
         {0,0,0,0,0,0,0}
     },
     {
-        {0,0,0,0,0,0,0},
+        {2,2,0,0,0,0,0},
         {0,0,0,4,0,0,0},
         {0,0,4,3,4,0,0},
         {0,0,0,4,0,0,0},
@@ -20,7 +20,7 @@ map={
         {0,0,0,0,0,0,0}
     },
     {
-        {2,2,0,0,0,0,0},
+        {1,1,0,0,0,0,0},
         {2,0,0,0,0,0,0},
         {0,0,0,3,0,0,0},
         {0,0,0,0,0,0,0},
@@ -49,32 +49,33 @@ map={
 }
 
 function love.load()
+
+    love.graphics.setBackgroundColor(0.6,0.6,1,1)
     love.graphics.setDefaultFilter("nearest", "nearest")
     mx, my = love.mouse.getPosition()
     troop_quads={}
-    monkey_images={love.graphics.newImage('images/monkey/up-left.png'),love.graphics.newImage('images/monkey/up-right.png'),love.graphics.newImage('images/monkey/down-left.png'),love.graphics.newImage('images/monkey/down-right.png')}
+    monkey_images={love.graphics.newImage('images/monkey/up-left.png'),love.graphics.newImage('images/monkey/down-left.png'),love.graphics.newImage('images/monkey/down-right.png'),love.graphics.newImage('images/monkey/up-right.png')}
     for x=0,3 do
         table.insert(troop_quads,love.graphics.newQuad(x*16,0,16,16,monkey_images[1]))
     end 
     
     tiles=love.graphics.newImage("images/tiles.png")
 	selected={x=1,y=1}
-	sine=0
     tile_quads=load_quads()
-    new_troop()
+    new_troop(5,5,3)
+    new_troop(7,6,4)
 end
 
 function love.update(dt)
-	sine=sine+3*dt
+    global_dt = dt
+    update_people()
 end
 
 function love.draw()
-	--print("x "..selected.x)
-	--print("y "..selected.y)
-	--print("e "..sine)
     love.graphics.push()
 	    love.graphics.scale(5)
         draw_grid()
+
     love.graphics.pop()
 end
 
@@ -100,6 +101,7 @@ function draw_grid()
                     --q=tile_quads[9][9]
                     local col =(x+y)/10
                     --love.graphics.setColor(col,col,col,1)
+                    love.graphics.setColor(1,1,1,1)
                     love.graphics.draw(tiles,q,80+_x-8,-10+_y+n*9,0,1,1)
                     
                 end
@@ -146,4 +148,23 @@ function love.keypressed( key, scancode, isrepeat )
     for i=#troop,1,-1 do
         troop[i]:rotate_left()
     end
+end
+
+function love.mousepressed(x,y,button)
+    if button ~= 1 then return end
+    for i=#troop,1,-1 do
+        local coords = {troop[i]:coords()}
+        
+        if CheckCollision(x/5,y/5,1,1,coords[1],coords[2],16,18) then
+            print(i)
+            print('clicked')
+        end
+    end
+end
+
+function CheckCollision(x1,y1,w1,h1, x2,y2,w2,h2)
+    return x1 < x2+w2 and
+        x2 < x1+w1 and
+        y1 < y2+h2 and
+        y2 < y1+h1
 end
