@@ -6,13 +6,20 @@ function new_troop(x,y,z)
         z=z,
         type=1,
         sine=0,
+        selected=false,
         sprite=math.floor(math.random(1,4)),
         update=function(self)
-            self.sine = self.sine + 0.1 + global_dt
+            if self.selected then
+                self.sine = self.sine + 0.3 + global_dt
+            end
         end,
         draw=function(self)
             local x,y= vec(self.x,self.y)
-            love.graphics.setColor(1.5-math.sin(self.sine),1.5-math.sin(self.sine),1.5-math.sin(self.sine),1)
+            if self.selected then
+                love.graphics.setColor(1.5-math.sin(self.sine),1.5-math.sin(self.sine),1.5-math.sin(self.sine),1)
+            else
+                love.graphics.setColor(1,1,1,1)
+            end
             love.graphics.draw(monkey_images[self.sprite],troop_quads[1],80+x-7,-12+y+self.z*9,0,1,1)
         end,
         rotate_left=function(self)

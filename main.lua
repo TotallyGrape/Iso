@@ -49,7 +49,8 @@ map={
 }
 
 function love.load()
-
+    current_state=''
+    state_switch('menu')
     love.graphics.setBackgroundColor(0.6,0.6,1,1)
     love.graphics.setDefaultFilter("nearest", "nearest")
     mx, my = love.mouse.getPosition()
@@ -58,24 +59,67 @@ function love.load()
     for x=0,3 do
         table.insert(troop_quads,love.graphics.newQuad(x*16,0,16,16,monkey_images[1]))
     end 
-    
     tiles=love.graphics.newImage("images/tiles.png")
 	selected={x=1,y=1}
     tile_quads=load_quads()
-    new_troop(5,5,3)
+    new_troop(3,3,1)
     new_troop(7,6,4)
 end
 
 function love.update(dt)
+    mx, my = love.mouse.getPosition()
     global_dt = dt
-    update_people()
+    state_update()
 end
 
 function love.draw()
-    love.graphics.push()
-	    love.graphics.scale(5)
-        draw_grid()
+    state_draw()
+    local _mx = mx + 72
+    local _my = my -10
+    local a = 0.5*16
+    local b = -0.5*16
+    local c = 0.25*18
+    local d = 0.25*18
 
+    local a =  0.25*18
+    local b = -(-0.5*16)
+    local c = -(0.25*18)
+    local d = 0.5*16
+    love.graphics.circle('fill',_mx,_my,10)
+end
+
+function state_switch(state)
+    state_exit(current_state)
+    current_state=state
+    state_enter(current_state)
+end
+
+function state_enter()
+
+end
+
+function state_exit()
+
+end
+
+function state_update()
+    if current_state=='menu' then
+        if love.keyboard.isDown('q') then
+            state_switch('game')
+        end
+    elseif current_state=='game' then
+	    update_people()
+    end
+end
+
+function state_draw()
+    love.graphics.push()
+        love.graphics.scale(5)
+    if current_state=='menu' then
+        love.graphics.print('press Q',10,10)
+    elseif current_state=='game' then
+        draw_grid()
+    end
     love.graphics.pop()
 end
 
@@ -102,7 +146,7 @@ function draw_grid()
                     local col =(x+y)/10
                     --love.graphics.setColor(col,col,col,1)
                     love.graphics.setColor(1,1,1,1)
-                    love.graphics.draw(tiles,q,80+_x-8,-10+_y+n*9,0,1,1)
+                    love.graphics.draw(tiles,q,72+_x,-10+_y+n*9,0,1,1)
                     
                 end
             end
@@ -154,9 +198,10 @@ function love.mousepressed(x,y,button)
     if button ~= 1 then return end
     for i=#troop,1,-1 do
         local coords = {troop[i]:coords()}
-        
+        troop[i].selected=false
         if CheckCollision(x/5,y/5,1,1,coords[1],coords[2],16,18) then
             print(i)
+            troop[i].selected=true
             print('clicked')
         end
     end
